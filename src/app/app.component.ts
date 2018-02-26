@@ -1,17 +1,19 @@
-import { Component, ViewChild } from "@angular/core";
+import { Component, ViewChild, OnInit } from "@angular/core";
 
 import {
   CropperSettings,
   Bounds,
   ImageCropperComponent
 } from "ngx-img-cropper";
+import { HttpClient } from "@angular/common/http";
+import { Observable } from "rxjs/Observable";
 
 @Component({
   selector: "app-root",
   templateUrl: "./app.component.html",
   styleUrls: ["./app.component.css"]
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = "app";
   name: string;
   data1: any;
@@ -19,10 +21,9 @@ export class AppComponent {
   croppedWidth: number;
   croppedHeight: number;
 
-  @ViewChild("cropper", undefined)
-  cropper: ImageCropperComponent;
+  @ViewChild("cropper") cropper: ImageCropperComponent;
 
-  constructor() {
+  constructor(private http: HttpClient) {
     this.name = "Angular2";
     this.cropperSettings1 = new CropperSettings();
     this.cropperSettings1.width = 200;
@@ -47,12 +48,18 @@ export class AppComponent {
     this.data1 = {};
   }
 
+  ngOnInit() {
+    console.log(this.cropper);
+  }
+
   cropped(bounds: Bounds) {
     this.croppedHeight = bounds.bottom - bounds.top;
     this.croppedWidth = bounds.right - bounds.left;
+    console.log(this.data1);
   }
 
   fileChangeListener($event) {
+    console.log("changed", event);
     var image: any = new Image();
     var file: File = $event.target.files[0];
     var myReader: FileReader = new FileReader();
@@ -63,5 +70,12 @@ export class AppComponent {
     };
 
     myReader.readAsDataURL(file);
+  }
+
+  upload() {
+    const uploadData = {
+      image: this.data1.image
+    };
+    this.http.post<Observable<any>>("apiUrl", uploadData).subscribe();
   }
 }
